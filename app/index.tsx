@@ -1,6 +1,7 @@
 import FloatingMenuButton from '@/components/FloatingMenuButton'; // Importe o FAB
 import { initDatabase } from '@/database/Database';
 import { getStatusList } from '@/database/services/StatusService';
+import * as ER from 'expo-router'
 import React from 'react';
 import { Alert, StyleSheet, Text, View } from 'react-native';
 
@@ -8,24 +9,28 @@ export default function HomeScreen() {
   React.useEffect(() => {
     const loadData = async () => {
       // Inicialização do DB
-      await initDatabase();
-      const status = await getStatusList();
-      console.log('Status do DB:', status);
-    };
-    loadData();
-  }, []);
-  
+      await initDatabase()
+      const status = await getStatusList()
+      console.log('Status do DB:', status)
+    }
+    loadData()
+  }, [])
+
   // Função de ação do Menu
   const handleMenuPress = (key: string) => {
-    // Usaremos o Expo Router para navegação em seguida
-    Alert.alert(`Ação de ${key}`, `Você clicou em ${key}. Implementar a navegação aqui.`);
-    // router.push(`/(screens)/${key}`);
-  };
+    switch (key) {
+      case 'cliente':
+        ER.router.push('/create')
+        break
+      case 'divida':
+        Alert.alert('Próximo Passo', 'Navegar para Registro de Dívida')
+        break
+    }
+  }
 
   return (
     // O View principal deve ocupar toda a área da tela
     <View style={styles.container}>
-      
       {/* Conteúdo Central da Tela */}
       <View style={styles.content}>
         <Text style={styles.welcomeText}>Bem-vindo à Caderneta Digital!</Text>
@@ -33,9 +38,8 @@ export default function HomeScreen() {
       </View>
 
       <FloatingMenuButton onMenuItemPress={handleMenuPress} />
-      
     </View>
-  );
+  )
 }
 
 const styles = StyleSheet.create({
@@ -60,4 +64,4 @@ const styles = StyleSheet.create({
     color: '#666',
     textAlign: 'center',
   },
-});
+})

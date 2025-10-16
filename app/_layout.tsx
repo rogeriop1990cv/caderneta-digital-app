@@ -11,7 +11,18 @@ export default function RootLayout() {
   return (
     <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
       <Stack>
-        <Stack.Screen name="index" options={{ title: 'Caderneta Digital' }} />
+        <Stack.Screen
+          name="index"
+          options={{ title: 'Caderneta Digital', headerStyle: { backgroundColor: '#A1CEDC' }, headerTintColor: '#fff' }}
+        />
+        <Stack.Screen
+          name="create"
+          options={{
+            title: 'Novo Cliente',
+            headerStyle: { backgroundColor: '#A1CEDC' },
+            headerTintColor: '#fff',
+          }}
+        />
       </Stack>
       <StatusBar style="auto" />
     </ThemeProvider>
