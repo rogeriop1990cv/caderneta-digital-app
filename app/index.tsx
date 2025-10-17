@@ -90,41 +90,56 @@ export default function HomeScreen() {
   }
 
   return (
-    // O View principal deve ocupar toda a área da tela
     <View style={styles.content}>
-      {/* Conteúdo Central da Tela */}
-
-      <View>
-        <TextInput value={buscar} onChangeText={handleBuscarCliente} placeholder="Buscar Cliente..." />
+      <View style={styles.inputContainer}>
+        <TextInput
+          value={buscar}
+          onChangeText={handleBuscarCliente}
+          style={styles.inputText}
+          placeholder="Buscar Cliente..."
+        />
       </View>
+      <View>
+        <FlatList
+          data={clientesFiltrada}
+          renderItem={renderItem}
+          keyExtractor={(item) => item.id.toString()} // Use um ID único
+          contentContainerStyle={clientesFiltrada.length === 0 ? styles.listEmptyContent : undefined}
+          ListEmptyComponent={() => (
+            <View style={styles.emptyContainer}>
+              <Text style={styles.welcomeText}>Bem-vindo à Caderneta Digital!</Text>
+              <Text style={styles.infoText}>Use o botão (+) para adicionar clientes ou dívidas.</Text>
+            </View>
+          )}
+          style={styles.list}
+        />
 
-      <FlatList
-        data={clientesFiltrada}
-        renderItem={renderItem}
-        keyExtractor={(item) => item.id.toString()} // Use um ID único
-        contentContainerStyle={clientesFiltrada.length === 0 ? styles.listEmptyContent : undefined}
-        ListEmptyComponent={() => (
-          <View style={styles.emptyContainer}>
-            <Text style={styles.welcomeText}>Bem-vindo à Caderneta Digital!</Text>
-            <Text style={styles.infoText}>Use o botão (+) para adicionar clientes ou dívidas.</Text>
-          </View>
-        )}
-        style={styles.list}
-      />
-
-      <FloatingMenuButton onMenuItemPress={handleMenuPress} />
+        <FloatingMenuButton onMenuItemPress={handleMenuPress} />
+      </View>
     </View>
   )
 }
 
 const styles = StyleSheet.create({
+  inputContainer: {
+    backgroundColor: '#fff',
+    display: 'flex',
+    marginBottom: 12,
+    padding: 10,
+  },
+  inputText: {
+    borderWidth: 1,
+    borderColor: '#ccc',
+    borderRadius: 8,
+    padding: 12,
+    fontSize: 16,
+    backgroundColor: '#f9f9f9',
+  },
   content: {
     flex: 1,
-    padding: 20,
+    display: 'flex',
   },
-  list: {
-    height: 250,
-  },
+  list: {},
   listEmptyContent: {
     flex: 1, // Para centralizar o conteúdo vazio
     justifyContent: 'center',

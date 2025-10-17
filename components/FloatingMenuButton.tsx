@@ -91,8 +91,8 @@ const styles = StyleSheet.create({
   },
   container: {
     position: 'absolute',
-    bottom: 60,
-    right: 30,
+    right: 10,
+    marginTop: 20,
     alignItems: 'flex-end',
   },
   // --- Estilos do FAB Principal ---
@@ -130,7 +130,7 @@ const styles = StyleSheet.create({
   },
   menuItemAnimated: {
     height: 5,
-    alignSelf: 'flex-end'
+    alignSelf: 'flex-end',
   },
   menuItemText: {
     color: '#007AFF',
