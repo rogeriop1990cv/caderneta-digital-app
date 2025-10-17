@@ -1,9 +1,10 @@
 import FloatingMenuButton from '@/components/FloatingMenuButton'; // Importe o FAB
 import { initDatabase } from '@/database/Database';
+import { getClientes } from '@/database/services/ClienteService'
 import { getStatusList } from '@/database/services/StatusService';
 import * as ER from 'expo-router'
 import React from 'react';
-import { Alert, StyleSheet, Text, View } from 'react-native';
+import { StyleSheet, Text, View } from 'react-native'
 
 export default function HomeScreen() {
   React.useEffect(() => {
@@ -11,7 +12,9 @@ export default function HomeScreen() {
       // Inicialização do DB
       await initDatabase()
       const status = await getStatusList()
+      const c = await getClientes()
       console.log('Status do DB:', status)
+      console.log('Clientes do DB:', c)
     }
     loadData()
   }, [])
@@ -23,7 +26,7 @@ export default function HomeScreen() {
         ER.router.push('/create')
         break
       case 'divida':
-        Alert.alert('Próximo Passo', 'Navegar para Registro de Dívida')
+        ER.router.push('/divida')
         break
     }
   }

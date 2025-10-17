@@ -4,9 +4,9 @@ import React, { useState } from 'react'
 import { Animated, StyleSheet, Text, TouchableOpacity, View } from 'react-native'
 
 const menuItems = [
-  { key: 'cliente', label: 'Novo Cliente', icon: 'person-add' },
-  { key: 'divida', label: 'Nova Dívida', icon: 'payments' },
-]
+  { key: 'divida', label: 'Nova Dívida', icon: 'payments', ordem: 2 },
+  { key: 'cliente', label: 'Novo Cliente', icon: 'person-add', ordem: 1 },
+].sort((a, b) => b.ordem - a.ordem)
 
 interface FloatingMenuButtonProps {
   onMenuItemPress: (key: string) => void

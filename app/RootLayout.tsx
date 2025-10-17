@@ -21,7 +21,16 @@ export default function RootLayout() {
         <ER.Stack.Screen
           name="create"
           options={{
-            title: 'Novo Cliente', // Força o título correto
+            title: 'Novo Cliente',
+            headerStyle: { backgroundColor: '#A1CEDC' },
+            headerTintColor: '#fff',
+          }}
+        />
+
+        <ER.Stack.Screen
+          name="divida"
+          options={{
+            title: 'Registrar Dívida',
             headerStyle: { backgroundColor: '#A1CEDC' },
             headerTintColor: '#fff',
           }}
