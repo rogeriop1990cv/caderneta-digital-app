@@ -40,6 +40,32 @@ export const createDivida = async ({
 }
 
 /**
+ * CRUD: getDividasIdByCliente - Retorna um registro de dívidas buscando por id.
+ */
+export const getDividasIdByCliente = async (id: number) => {
+  if (!db) throw new Error('db não existe')
+  const params = [id]
+  const sql = `
+        SELECT 
+            D.id, 
+            D.valor, 
+            D.data_registro, 
+            D.data_vencimento, 
+            D.observacoes,
+            C.nome AS cliente_nome,
+            S.nome AS status_nome,
+            C.id AS cliente_id,
+            S.id AS status_id
+        FROM DIVIDA D
+        JOIN CLIENTE C ON D.cliente_id = C.id
+        JOIN STATUS S ON D.status_id = S.id
+        WHERE D.cliente_id = ?
+    `
+
+  const dividas = await db.getAllAsync(sql, params)
+  return dividas
+}
+/**
  * CRUD: DIVIDA - Retorna todos os registros de dívidas com JOINs para dados legíveis.
  * Traz o nome do Cliente e o nome do Status.
  */

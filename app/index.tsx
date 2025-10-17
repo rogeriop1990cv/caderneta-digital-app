@@ -1,23 +1,68 @@
 import FloatingMenuButton from '@/components/FloatingMenuButton'; // Importe o FAB
 import { initDatabase } from '@/database/Database';
-import { getClientes } from '@/database/services/ClienteService'
-import { getStatusList } from '@/database/services/StatusService';
+import { getClientes, ICliente } from '@/database/services/ClienteService'
+import { getDividasIdByCliente } from '@/database/services/DividaService'
+import * as RN from '@react-navigation/native'
 import * as ER from 'expo-router'
 import React from 'react';
-import { StyleSheet, Text, View } from 'react-native'
+import { FlatList, StyleSheet, Text, TouchableOpacity, View } from 'react-native'
+
+// Componente para renderizar cada item da lista
+const ClienteItem = ({ cliente }: { cliente: ICliente }) => {
+  // Adicione a lógica para navegar para os detalhes do cliente ao clicar
+  const handlePress = () => {
+    // Exemplo de navegação para uma rota dinâmica como /details/[id]
+    // Suponha que você tem uma tela em 'app/details/[id].tsx'
+    ER.router.push(`/details/${cliente.id}`)
+  }
+
+  return (
+    <TouchableOpacity style={styles.itemContainer} onPress={handlePress}>
+      <View style={styles.textContainer}>
+        <Text style={styles.clienteNome}>{cliente.nome}</Text>
+      </View>
+      <Text style={styles.dividaValor}>
+        {/* Formatação para moeda (ajuste conforme a necessidade) */}
+        R$ {cliente?.totalDivida?.toFixed(2).replace('.', ',')}
+      </Text>
+    </TouchableOpacity>
+  )
+}
 
 export default function HomeScreen() {
-  React.useEffect(() => {
-    const loadData = async () => {
-      // Inicialização do DB
-      await initDatabase()
-      const status = await getStatusList()
-      const c = await getClientes()
-      console.log('Status do DB:', status)
-      console.log('Clientes do DB:', c)
-    }
-    loadData()
-  }, [])
+  const [clientes, setClientes] = React.useState<ICliente[]>([])
+
+  RN.useFocusEffect(
+    React.useCallback(() => {
+      const loadData = async () => {
+        await initDatabase()
+        const clientesOriginais = await getClientes()
+
+        const clientesComDividasPromise = clientesOriginais.map(async (cliente) => {
+          const id = cliente.id
+
+          const divida = await getDividasIdByCliente(id)
+
+          const totalDivida =
+            divida?.reduce<number>((acc, curr) => {
+              const valorNumerico = Number((curr as any).valor) || 0
+              return acc + valorNumerico
+            }, 0) ?? 0
+
+          const clienteComTotal = {
+            ...cliente, // Copia todas as propriedades do cliente original
+            totalDivida, // Adiciona a nova propriedade
+          }
+          return clienteComTotal
+        })
+
+        const clientesProcessados = await Promise.all(clientesComDividasPromise)
+        setClientes(clientesProcessados)
+      }
+
+      loadData()
+    }, [])
+  )
 
   // Função de ação do Menu
   const handleMenuPress = (key: string) => {
@@ -31,14 +76,30 @@ export default function HomeScreen() {
     }
   }
 
+  const renderItem = ({ item }: { item: ICliente }) => <ClienteItem cliente={item} />
+
   return (
     // O View principal deve ocupar toda a área da tela
-    <View style={styles.container}>
+    <View style={styles.content}>
       {/* Conteúdo Central da Tela */}
       <View style={styles.content}>
         <Text style={styles.welcomeText}>Bem-vindo à Caderneta Digital!</Text>
         <Text style={styles.infoText}>Use o botão (+) para adicionar clientes ou dívidas.</Text>
       </View>
+
+      <FlatList
+        data={clientes}
+        renderItem={renderItem}
+        keyExtractor={(item) => item.id.toString()} // Use um ID único
+        contentContainerStyle={clientes.length === 0 ? styles.listEmptyContent : undefined}
+        ListEmptyComponent={() => (
+          <View style={styles.emptyContainer}>
+            <Text style={styles.welcomeText}>Bem-vindo à Caderneta Digital!</Text>
+            <Text style={styles.infoText}>Use o botão (+) para adicionar clientes ou dívidas.</Text>
+          </View>
+        )}
+        style={styles.list}
+      />
 
       <FloatingMenuButton onMenuItemPress={handleMenuPress} />
     </View>
@@ -46,15 +107,23 @@ export default function HomeScreen() {
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1, // Preenche toda a tela, necessário para posicionamento absoluto do FAB
-    backgroundColor: '#f0f0f0', // Fundo levemente cinza
-  },
   content: {
     flex: 1,
     padding: 20,
+  },
+  list: {
+    flex: 1, // A FlatList ocupa todo o espaço
+  },
+  listEmptyContent: {
+    flex: 1, // Para centralizar o conteúdo vazio
     justifyContent: 'center',
     alignItems: 'center',
+  },
+  emptyContainer: {
+    padding: 20,
+    justifyContent: 'center',
+    alignItems: 'center',
+    // Pode querer adicionar estilos de tamanho aqui se a FlatList não estiver em flex: 1 total
   },
   welcomeText: {
     fontSize: 22,
@@ -66,5 +135,44 @@ const styles = StyleSheet.create({
     fontSize: 16,
     color: '#666',
     textAlign: 'center',
+    marginBottom: 20,
+  },
+
+  // Estilos para o item da FlatList
+  itemContainer: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    padding: 15,
+    marginHorizontal: 10,
+    marginVertical: 5,
+    backgroundColor: '#fff',
+    borderRadius: 8,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.2,
+    shadowRadius: 1.41,
+    elevation: 2,
+    borderLeftWidth: 5,
+    borderLeftColor: '#4CAF50', // Uma cor para destaque
+  },
+  textContainer: {
+    flex: 1,
+  },
+  clienteNome: {
+    fontSize: 18,
+    fontWeight: '600',
+    color: '#333',
+  },
+  clienteDetalhe: {
+    fontSize: 12,
+    color: '#999',
+    marginTop: 2,
+  },
+  dividaValor: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    color: '#D32F2F', // Cor vermelha para dívidas
+    marginLeft: 10,
   },
 })

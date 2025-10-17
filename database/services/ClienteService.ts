@@ -5,6 +5,7 @@ export interface ICliente {
   nome: string
   observacoes: string
   telefone: string
+  totalDivida?: number
 }
 
 /**
