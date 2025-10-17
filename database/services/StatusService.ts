@@ -1,5 +1,10 @@
 import { db } from '@/database/Database'
 
+interface IStatus {
+  id: number
+  nome: string
+}
+
 /**
  * Retorna todos os status disponíveis para as dívidas.
  */
@@ -8,7 +13,7 @@ export const getStatusList = async () => {
     throw new Error('db não existe')
   }
   const sql = 'SELECT * FROM STATUS ORDER BY id ASC'
-  const status = await db.getAllAsync(sql)
+  const status: IStatus[] = await db.getAllAsync(sql)
   return status
 }
 
@@ -20,7 +25,7 @@ export const getStatusIdByName = async (name: string) => {
     throw new Error('db não existe')
   }
   const sql = 'SELECT id FROM STATUS WHERE nome = ?'
-  const result = await db.getFirstAsync(sql, name) // getFirstAsync retorna o primeiro item ou null  
+  const result: IStatus | null = await db.getFirstAsync(sql, name)
 
   return result ? result.id : null
 }

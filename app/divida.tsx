@@ -18,7 +18,8 @@ export default function DividaCreateScreen() {
   useEffect(() => {
     const loadClientes = async () => {
       try {
-        const list = await getClientes()       
+        const list = await getClientes()
+
         setClientes(list)
 
         // Define o primeiro cliente como padrão, se houver
