@@ -5,7 +5,7 @@ import { getDividasIdByCliente } from '@/database/services/DividaService'
 import * as RN from '@react-navigation/native'
 import * as ER from 'expo-router'
 import React from 'react';
-import { FlatList, StyleSheet, Text, TouchableOpacity, View } from 'react-native'
+import { FlatList, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native'
 
 // Componente para renderizar cada item da lista
 const ClienteItem = ({ cliente }: { cliente: ICliente }) => {
@@ -31,6 +31,8 @@ const ClienteItem = ({ cliente }: { cliente: ICliente }) => {
 
 export default function HomeScreen() {
   const [clientes, setClientes] = React.useState<ICliente[]>([])
+  const [clientesFiltrada, setClientesFiltrada] = React.useState<ICliente[]>([])
+  const [buscar, setBuscar] = React.useState('')
 
   RN.useFocusEffect(
     React.useCallback(() => {
@@ -58,6 +60,7 @@ export default function HomeScreen() {
 
         const clientesProcessados = await Promise.all(clientesComDividasPromise)
         setClientes(clientesProcessados)
+        setClientesFiltrada(clientesProcessados)
       }
 
       loadData()
@@ -77,21 +80,29 @@ export default function HomeScreen() {
   }
 
   const renderItem = ({ item }: { item: ICliente }) => <ClienteItem cliente={item} />
+  const handleBuscarCliente = (event: string) => {
+    // se for input HTML comum:
+    // setBuscar(event.target.value);
+
+    // se for React Native:
+    setBuscar(event)
+    setClientesFiltrada(clientes.filter((c) => c.nome.includes(event)))
+  }
 
   return (
     // O View principal deve ocupar toda a área da tela
     <View style={styles.content}>
       {/* Conteúdo Central da Tela */}
-      <View style={styles.content}>
-        <Text style={styles.welcomeText}>Bem-vindo à Caderneta Digital!</Text>
-        <Text style={styles.infoText}>Use o botão (+) para adicionar clientes ou dívidas.</Text>
+
+      <View>
+        <TextInput value={buscar} onChangeText={handleBuscarCliente} placeholder="Buscar Cliente..." />
       </View>
 
       <FlatList
-        data={clientes}
+        data={clientesFiltrada}
         renderItem={renderItem}
         keyExtractor={(item) => item.id.toString()} // Use um ID único
-        contentContainerStyle={clientes.length === 0 ? styles.listEmptyContent : undefined}
+        contentContainerStyle={clientesFiltrada.length === 0 ? styles.listEmptyContent : undefined}
         ListEmptyComponent={() => (
           <View style={styles.emptyContainer}>
             <Text style={styles.welcomeText}>Bem-vindo à Caderneta Digital!</Text>
@@ -112,7 +123,7 @@ const styles = StyleSheet.create({
     padding: 20,
   },
   list: {
-    flex: 1, // A FlatList ocupa todo o espaço
+    height: 250,
   },
   listEmptyContent: {
     flex: 1, // Para centralizar o conteúdo vazio
