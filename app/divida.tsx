@@ -1,4 +1,4 @@
-import { getClientes } from '@/database/services/ClienteService'
+import { getClientes, ICliente } from '@/database/services/ClienteService'
 import { createDivida } from '@/database/services/DividaService'
 import { Picker } from '@react-native-picker/picker'
 import { router } from 'expo-router'
@@ -7,8 +7,8 @@ import { ActivityIndicator, Alert, Button, ScrollView, StyleSheet, Text, TextInp
 // Você pode precisar instalar o picker: npx expo install @react-native-picker/picker
 
 export default function DividaCreateScreen() {
-  const [clientes, setClientes] = useState<{ id: number; nome: string }[]>([])
-  const [clienteIdSelecionado, setClienteIdSelecionado] = useState<number | undefined>(undefined)
+  const [clientes, setClientes] = useState<ICliente[]>([])
+  const [clienteSelecionado, setClienteSelecionado] = useState<ICliente | undefined>(undefined)
 
   const [valor, setValor] = useState('')
   const [observacoes, setObservacoes] = useState('')
@@ -24,7 +24,7 @@ export default function DividaCreateScreen() {
 
         // Define o primeiro cliente como padrão, se houver
         if (list.length > 0) {
-          setClienteIdSelecionado(list[0].id)
+          setClienteSelecionado(list[0])
         }
       } catch (error) {
         console.error('Erro ao carregar clientes:', error)
@@ -39,7 +39,7 @@ export default function DividaCreateScreen() {
   const handleSave = async () => {
     const valorNumerico = parseFloat(valor.replace(',', '.'))
 
-    if (!clienteIdSelecionado || isNaN(valorNumerico) || valorNumerico <= 0) {
+    if (!clienteSelecionado || isNaN(valorNumerico) || valorNumerico <= 0) {
       Alert.alert('Erro', 'Selecione um cliente e insira um valor válido.')
       return
     }
@@ -49,11 +49,16 @@ export default function DividaCreateScreen() {
 
     setLoading(true)
     try {
-      const newId = await createDivida(clienteIdSelecionado, valorNumerico, dataRegistro, observacoes.trim())
+      await createDivida({
+        cliente_id: clienteSelecionado.id,
+        valor: valorNumerico,
+        data_registro: dataRegistro,
+        observacoes: observacoes.trim(),
+      })
 
       Alert.alert(
         'Sucesso!',
-        `Dívida de R$ ${valorNumerico.toFixed(2)} registrada para o cliente ID ${clienteIdSelecionado}.`
+        `Dívida de R$ ${valorNumerico.toFixed(2)} registrada para o cliente ${clienteSelecionado.nome}.`
       )
       router.back()
     } catch (error) {
@@ -82,15 +87,18 @@ export default function DividaCreateScreen() {
     )
   }
 
+  const handleOnValueChange = (itemValue: number) => {
+    const cliente = clientes.find((cliente) => cliente.id === itemValue)
+
+    setClienteSelecionado(cliente)
+    return
+  }
+
   return (
     <ScrollView contentContainerStyle={styles.container}>
       <Text style={styles.label}>Cliente *</Text>
       <View style={styles.pickerContainer}>
-        <Picker
-          selectedValue={clienteIdSelecionado}
-          onValueChange={(itemValue) => setClienteIdSelecionado(itemValue as number)}
-          style={styles.picker}
-        >
+        <Picker selectedValue={clienteSelecionado?.id} onValueChange={handleOnValueChange} style={styles.picker}>
           {clientes.map((c) => (
             <Picker.Item key={c.id} label={c.nome} value={c.id} />
           ))}
