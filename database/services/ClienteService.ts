@@ -1,6 +1,6 @@
 import { db } from '../Database'
 
-interface ICliente {
+export interface ICliente {
   id: number
   nome: string
   observacoes: string

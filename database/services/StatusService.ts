@@ -1,6 +1,6 @@
 import { db } from '@/database/Database'
 
-interface IStatus {
+export interface IStatus {
   id: number
   nome: string
 }

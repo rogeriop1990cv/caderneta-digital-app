@@ -1,17 +1,17 @@
 import { db } from '../Database'
 
-interface IDivida {
+export interface IDivida {
   id: number
   cliente_id: number
   status_id: number
   valor: number
   data_registro?: string
-  data_vencimento: string
+  data_vencimento?: string
   observacoes: string
 }
 
-type CreateDividaInput = Omit<IDivida, 'id'>
-type UpdateDividaInput = Omit<IDivida, 'cliente_id'>
+export type CreateDividaInput = Omit<IDivida, 'id' | 'status_id'> & Partial<Pick<IDivida, 'status_id' | 'observacoes'>>
+export type UpdateDividaInput = Omit<IDivida, 'cliente_id'>
 
 /**
  * CRUD: DIVIDA - Cria um novo registro de dívida.
@@ -21,7 +21,7 @@ export const createDivida = async ({
   cliente_id,
   valor,
   data_registro = '',
-  data_vencimento,
+  data_vencimento = '',
   observacoes,
 }: CreateDividaInput) => {
   if (!db) throw new Error('db não existe')
