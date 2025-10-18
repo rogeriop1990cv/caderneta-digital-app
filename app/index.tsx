@@ -2,9 +2,10 @@ import FloatingMenuButton from '@/components/FloatingMenuButton'; // Importe o F
 import { initDatabase } from '@/database/Database';
 import { getClientes, ICliente } from '@/database/services/ClienteService'
 import { getDividasIdByCliente } from '@/database/services/DividaService'
+import somarDividas from '@/utils/somarDividas'
 import * as RN from '@react-navigation/native'
 import * as ER from 'expo-router'
-import React from 'react';
+import React from 'react'
 import { FlatList, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native'
 
 // Componente para renderizar cada item da lista
@@ -13,7 +14,7 @@ const ClienteItem = ({ cliente }: { cliente: ICliente }) => {
   const handlePress = () => {
     // Exemplo de navegação para uma rota dinâmica como /details/[id]
     // Suponha que você tem uma tela em 'app/details/[id].tsx'
-    ER.router.push(`/details/${cliente.id}`)
+    ER.router.push(`/detalhes?id=${cliente.id}`)
   }
 
   return (
@@ -45,11 +46,7 @@ export default function HomeScreen() {
 
           const divida = await getDividasIdByCliente(id)
 
-          const totalDivida =
-            divida?.reduce<number>((acc, curr) => {
-              const valorNumerico = Number((curr as any).valor) || 0
-              return acc + valorNumerico
-            }, 0) ?? 0
+          const totalDivida = somarDividas(divida)
 
           const clienteComTotal = {
             ...cliente, // Copia todas as propriedades do cliente original
@@ -99,23 +96,22 @@ export default function HomeScreen() {
           placeholder="Buscar Cliente..."
         />
       </View>
-      <View>
-        <FlatList
-          data={clientesFiltrada}
-          renderItem={renderItem}
-          keyExtractor={(item) => item.id.toString()} // Use um ID único
-          contentContainerStyle={clientesFiltrada.length === 0 ? styles.listEmptyContent : undefined}
-          ListEmptyComponent={() => (
-            <View style={styles.emptyContainer}>
-              <Text style={styles.welcomeText}>Bem-vindo à Caderneta Digital!</Text>
-              <Text style={styles.infoText}>Use o botão (+) para adicionar clientes ou dívidas.</Text>
-            </View>
-          )}
-          style={styles.list}
-        />
 
-        <FloatingMenuButton onMenuItemPress={handleMenuPress} />
-      </View>
+      <FlatList
+        data={clientesFiltrada}
+        renderItem={renderItem}
+        keyExtractor={(item) => item.id.toString()} // Use um ID único
+        contentContainerStyle={clientesFiltrada.length === 0 ? styles.listEmptyContent : undefined}
+        ListEmptyComponent={() => (
+          <View style={styles.emptyContainer}>
+            <Text style={styles.welcomeText}>Bem-vindo à Caderneta Digital!</Text>
+            <Text style={styles.infoText}>Use o botão (+) para adicionar clientes ou dívidas.</Text>
+          </View>
+        )}
+        style={styles.list}
+      />
+
+      <FloatingMenuButton onMenuItemPress={handleMenuPress} />
     </View>
   )
 }
@@ -139,7 +135,9 @@ const styles = StyleSheet.create({
     flex: 1,
     display: 'flex',
   },
-  list: {},
+  list: {
+    flex: 1,
+  },
   listEmptyContent: {
     flex: 1, // Para centralizar o conteúdo vazio
     justifyContent: 'center',

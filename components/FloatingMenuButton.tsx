@@ -86,13 +86,13 @@ const FloatingMenuButton: React.FC<FloatingMenuButtonProps> = ({ onMenuItemPress
 
 const styles = StyleSheet.create({
   fullScreenContainer: {
-    flex: 1, // Preenche toda a tela
     backgroundColor: '#f0f0f0',
+    height: 130,
+    marginRight: 10,
   },
   container: {
     position: 'absolute',
     right: 10,
-    marginTop: 20,
     alignItems: 'flex-end',
   },
   // --- Estilos do FAB Principal ---

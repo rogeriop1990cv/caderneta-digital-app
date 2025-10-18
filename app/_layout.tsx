@@ -23,6 +23,14 @@ export default function RootLayout() {
             headerTintColor: '#fff',
           }}
         />
+        <Stack.Screen
+          name="detalhes"
+          options={{
+            title: 'Detalhes da Divida',
+            headerStyle: { backgroundColor: '#A1CEDC' },
+            headerTintColor: '#fff',
+          }}
+        />
       </Stack>
       <StatusBar style="auto" />
     </ThemeProvider>

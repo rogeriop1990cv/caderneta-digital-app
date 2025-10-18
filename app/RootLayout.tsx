@@ -18,23 +18,9 @@ export default function RootLayout() {
           }}
         />
 
-        <ER.Stack.Screen
-          name="create"
-          options={{
-            title: 'Novo Cliente',
-            headerStyle: { backgroundColor: '#A1CEDC' },
-            headerTintColor: '#fff',
-          }}
-        />
-
-        <ER.Stack.Screen
-          name="divida"
-          options={{
-            title: 'Registrar Dívida',
-            headerStyle: { backgroundColor: '#A1CEDC' },
-            headerTintColor: '#fff',
-          }}
-        />
+        <ER.Stack.Screen name="create" />
+        <ER.Stack.Screen name="divida" />
+        <ER.Stack.Screen name="detalhes" />
       </ER.Stack>
       <ESB.StatusBar style="auto" />
     </ThemeProvider>

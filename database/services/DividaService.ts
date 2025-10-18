@@ -1,6 +1,8 @@
 import { db } from '../Database'
 
 export interface IDivida {
+  cliente_nome?: string
+  status_nome?: string
   id: number
   cliente_id: number
   status_id: number
@@ -62,7 +64,7 @@ export const getDividasIdByCliente = async (id: number) => {
         WHERE D.cliente_id = ?
     `
 
-  const dividas = await db.getAllAsync(sql, params)
+  const dividas = (await db.getAllAsync(sql, params)) as IDivida[]
   return dividas
 }
 /**
@@ -118,4 +120,38 @@ export const deleteDivida = async (id: number) => {
   const sql = 'DELETE FROM DIVIDA WHERE id = ?'
   const result = await db.runAsync(sql, id)
   return result.changes
+}
+
+/**
+ * CRUD: DIVIDA - Deleta todos registro de dívida pelo id do cliente.
+ */
+export const deleteTodasDivida = async (id: number) => {
+  if (!db) throw new Error('db não existe')
+
+  const sql = 'DELETE FROM DIVIDA WHERE cliente_id = ?'
+  const result = await db.runAsync(sql, id)
+  return result.changes
+}
+
+/**
+ * CRUD: getDividaAtiva - Mostra se o cliente tem divida ou nao
+ */
+export const getDividaAtiva = async (id: number) => {
+  if (!db) throw new Error('db não existe')
+
+  const sql = `
+            SELECT 
+              CASE 
+                  WHEN EXISTS (
+                      SELECT 1 
+                      FROM DIVIDA d
+                      JOIN STATUS s ON s.id = d.status_id
+                      WHERE d.cliente_id = ? 
+                        AND s.nome != 'Paga'
+                  ) THEN 'false'
+        ELSE 'true'
+              END AS tem_divida_ativa;
+`
+  const result = await db.getAllAsync(sql, id)
+  return JSON.parse(result[0]?.tem_divida_ativa || 'null')
 }
