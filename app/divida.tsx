@@ -60,7 +60,7 @@ export default function DividaCreateScreen() {
         'Sucesso!',
         `Dívida de R$ ${valorNumerico.toFixed(2)} registrada para o cliente ${clienteSelecionado.nome}.`
       )
-      router.back()
+      router.push('/')
     } catch (error) {
       console.error('Erro ao registrar dívida:', error)
       Alert.alert('Erro', 'Não foi possível registrar a dívida.')
@@ -89,7 +89,6 @@ export default function DividaCreateScreen() {
 
   const handleOnValueChange = (itemValue: number) => {
     const cliente = clientes.find((cliente) => cliente.id === itemValue)
-
     setClienteSelecionado(cliente)
     return
   }

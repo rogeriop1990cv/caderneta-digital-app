@@ -1,15 +1,15 @@
-import FloatingMenuButton from '@/components/FloatingMenuButton'; // Importe o FAB
-import { initDatabase } from '@/database/Database';
-import { getClientes, ICliente } from '@/database/services/ClienteService'
-import { getDividasIdByCliente } from '@/database/services/DividaService'
+import FloatingMenuButton from '@/components/FloatingMenuButton' // Importe o FAB
+import { initDatabase } from '@/database/Database'
+import { deleteCliente, getClientes, ICliente } from '@/database/services/ClienteService'
+import { deleteTodasDivida, getDividasIdByCliente } from '@/database/services/DividaService'
 import somarDividas from '@/utils/somarDividas'
 import * as RN from '@react-navigation/native'
 import * as ER from 'expo-router'
 import React from 'react'
-import { FlatList, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native'
+import { Alert, FlatList, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native'
 
 // Componente para renderizar cada item da lista
-const ClienteItem = ({ cliente }: { cliente: ICliente }) => {
+const ClienteItem = ({ cliente, deleteCliente }: { cliente: ICliente; deleteCliente: Function }) => {
   // Adicione a lógica para navegar para os detalhes do cliente ao clicar
   const handlePress = () => {
     // Exemplo de navegação para uma rota dinâmica como /details/[id]
@@ -18,7 +18,7 @@ const ClienteItem = ({ cliente }: { cliente: ICliente }) => {
   }
 
   return (
-    <TouchableOpacity style={styles.itemContainer} onPress={handlePress}>
+    <TouchableOpacity style={styles.itemContainer} onPress={handlePress} onLongPress={() => deleteCliente(cliente.id)}>
       <View style={styles.textContainer}>
         <Text style={styles.clienteNome}>{cliente.nome}</Text>
       </View>
@@ -45,7 +45,6 @@ export default function HomeScreen() {
           const id = cliente.id
 
           const divida = await getDividasIdByCliente(id)
-
           const totalDivida = somarDividas(divida)
 
           const clienteComTotal = {
@@ -64,6 +63,26 @@ export default function HomeScreen() {
     }, [])
   )
 
+  console.log({
+    clientes,
+  })
+
+  const handleDelete = (id: number) => {
+    Alert.alert('Excluir item', 'Tem certeza que deseja excluir este item?', [
+      {
+        text: 'Excluir',
+        onPress: async () => {
+          await deleteCliente(id)
+          await deleteTodasDivida(id)
+          const clienteAtuais = clientes?.filter((c) => c.id !== id) || []
+          setClientes(clienteAtuais)
+          setClientesFiltrada(clienteAtuais)
+        },
+      },
+      { text: 'Cancelar', style: 'cancel' },
+    ])
+  }
+
   // Função de ação do Menu
   const handleMenuPress = (key: string) => {
     switch (key) {
@@ -76,7 +95,7 @@ export default function HomeScreen() {
     }
   }
 
-  const renderItem = ({ item }: { item: ICliente }) => <ClienteItem cliente={item} />
+  const renderItem = ({ item }: { item: ICliente }) => <ClienteItem cliente={item} deleteCliente={handleDelete} />
   const handleBuscarCliente = (event: string) => {
     // se for input HTML comum:
     // setBuscar(event.target.value);

@@ -2,7 +2,7 @@ import { deleteTodasDivida, getDividaAtiva, getDividasIdByCliente, IDivida } fro
 import somarDividas from '@/utils/somarDividas'
 import * as ER from 'expo-router'
 import React from 'react'
-import { Alert, FlatList, StyleSheet, Text, TouchableOpacity, View } from 'react-native'
+import { Alert, Button, FlatList, StyleSheet, Text, TouchableOpacity, View } from 'react-native'
 
 // Componente para renderizar cada item da lista
 const ClienteItem = ({ cliente }: { cliente: IDivida }) => {
@@ -31,7 +31,6 @@ export default function DetalhesDividaScreen() {
       const dividas = ((await getDividasIdByCliente(id)) || []) as IDivida[]
       const temDivida = await getDividaAtiva(id)
       const totalSoma = somarDividas(dividas)
-      console.log({ temDivida })
 
       setQuitarDivida(temDivida)
       setListaDividas(dividas)
@@ -71,8 +70,9 @@ export default function DetalhesDividaScreen() {
           keyExtractor={(item) => item.id.toString()} // Use um ID único
           contentContainerStyle={listaDividas.length === 0 ? styles.listEmptyContent : undefined}
           ListEmptyComponent={() => (
-            <View style={styles.emptyContainer}>
-              <Text style={styles.welcomeText}>Não existe divida para esse cliente!</Text>
+            <View style={styles.loadingContainer}>
+              <Text style={styles.infoText}>Nenhum divida cadastrado.</Text>
+              <Button title="Cadastrar Novo Divida" onPress={() => ER.router.push('/divida')} />
             </View>
           )}
           style={styles.list}
@@ -108,6 +108,7 @@ const styles = StyleSheet.create({
     marginBottom: 12,
     padding: 10,
   },
+  loadingContainer: { flex: 1, justifyContent: 'center', alignItems: 'center', padding: 20 },
   inputText: {
     borderWidth: 1,
     borderColor: '#ccc',
